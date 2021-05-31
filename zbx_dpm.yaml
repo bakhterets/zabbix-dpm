@@ -1,0 +1,301 @@
+zabbix_export:
+  version: '5.2'
+  date: '2020-12-24T12:50:49Z'
+  groups:
+    -
+      name: Services
+  templates:
+    -
+      template: 'Template DPM alerts'
+      name: 'Template DPM alerts'
+      groups:
+        -
+          name: Services
+      applications:
+        -
+          name: 'DPM Alerts'
+        -
+          name: 'DPM Services'
+      items:
+        -
+          name: 'Export result  Xml dpm'
+          type: ZABBIX_ACTIVE
+          key: 'system.run[powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Program Files\Zabbix Agent\scripts\zabbix_dpm.ps1" ExportDPMAlerts,nowait]'
+          delay: '180'
+          history: 5d
+          trends: 15d
+          applications:
+            -
+              name: 'DPM Alerts'
+          triggers:
+            -
+              expression: '{last()}<1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{last()}=1'
+              name: 'Export DPM Error'
+              priority: WARNING
+              manual_close: 'YES'
+      discovery_rules:
+        -
+          name: 'DPM discovery alerts'
+          key: 'dpm["DiscoveryAlerts"]'
+          delay: '1800'
+          lifetime: 1h
+          item_prototypes:
+            -
+              name: AffectedArea
+              key: 'dpm["GetAlertInfo","{#ALERTID}","AffectedArea"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: Datasource
+              key: 'dpm["GetAlertInfo","{#ALERTID}","Datasource"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: DatasourceId
+              key: 'dpm["GetAlertInfo","{#ALERTID}","DatasourceId"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: ErrorInfo
+              key: 'dpm["GetAlertInfo","{#ALERTID}","ErrorInfo"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: TEXT
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: IsResolved
+              key: 'dpm["GetAlertInfo","{#ALERTID}","IsResolved"]'
+              delay: '1800'
+              history: 7d
+              applications:
+                -
+                  name: 'DPM Alerts'
+              valuemap:
+                name: dpmIsResolved
+              preprocessing:
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+                -
+                  type: CHECK_NOT_SUPPORTED
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '5'
+            -
+              name: OccurredSince
+              key: 'dpm["GetAlertInfo","{#ALERTID}","OccurredSince"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: LOG
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: PS
+              key: 'dpm["GetAlertInfo","{#ALERTID}","PS"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: Resolution
+              key: 'dpm["GetAlertInfo","{#ALERTID}","Resolution"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: ResolvedDateTime
+              key: 'dpm["GetAlertInfo","{#ALERTID}","ResolvedDateTime"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: LOG
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: ServerName
+              key: 'dpm["GetAlertInfo","{#ALERTID}","ServerName"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: Severity
+              key: 'dpm["GetAlertInfo","{#ALERTID}","Severity"]'
+              delay: '1800'
+              history: 7d
+              applications:
+                -
+                  name: 'DPM Alerts'
+              valuemap:
+                name: dpmSeverity
+              preprocessing:
+                -
+                  type: CHECK_NOT_SUPPORTED
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '5'
+            -
+              name: Type
+              key: 'dpm["GetAlertInfo","{#ALERTID}","Type"]'
+              delay: '1800'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              applications:
+                -
+                  name: 'DPM Alerts'
+            -
+              name: Visible
+              key: 'dpm["GetAlertInfo","{#ALERTID}","Visible"]'
+              delay: '1800'
+              history: 7d
+              applications:
+                -
+                  name: 'DPM Alerts'
+              preprocessing:
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+          trigger_prototypes:
+            -
+              expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=2 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=1 or ({Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=-1 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=-1)'
+              name: 'Severity of alert for {#ALERTID} (Error)'
+              priority: HIGH
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: Service
+                  value: dpm
+            -
+              expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=0 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=1 or ({Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=-1 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=-1)'
+              name: 'Severity of alert for {#ALERTID} (Information)'
+              priority: INFO
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: Service
+                  value: dpm
+            -
+              expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=3 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=1 or ({Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=-1 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=-1)'
+              name: 'Severity of alert for {#ALERTID} (Unknown)'
+              priority: WARNING
+              description: 'unknown error'
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: Service
+                  value: dpm
+            -
+              expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=1 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=1 or ({Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","IsResolved"].last()}=-1 and {Template DPM alerts:dpm["GetAlertInfo","{#ALERTID}","Severity"].last()}=-1)'
+              name: 'Severity of alert for {#ALERTID} (Warning)'
+              priority: AVERAGE
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: Service
+                  value: dpm
+        -
+          name: 'DPM Services'
+          key: service.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#SERVICE.NAME}'
+                value: '@DPM'
+                formulaid: A
+              -
+                macro: '{#SERVICE.STARTUP}'
+                value: '0'
+                formulaid: B
+          item_prototypes:
+            -
+              name: 'Status {#SERVICE.DISPLAYNAME}'
+              key: 'service.info[{#SERVICE.NAME},state]'
+              delay: '60'
+              applications:
+                -
+                  name: 'DPM Services'
+              trigger_prototypes:
+                -
+                  expression: '{min(3)}<>0'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '{min(#3)}=0'
+                  name: '{#SERVICE.DISPLAYNAME} is not running (start type {#SERVICE.STARTUPNAME})'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+      tags:
+        -
+          tag: Service
+          value: dpm
+  value_maps:
+    -
+      name: dpmIsResolved
+      mappings:
+        -
+          value: '0'
+          newvalue: Unresolved
+        -
+          value: '1'
+          newvalue: Resolved
+    -
+      name: dpmSeverity
+      mappings:
+        -
+          value: '0'
+          newvalue: Information
+        -
+          value: '1'
+          newvalue: Warning
+        -
+          value: '2'
+          newvalue: Error
+        -
+          value: '3'
+          newvalue: Unknown
